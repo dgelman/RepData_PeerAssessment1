@@ -7,7 +7,8 @@ output: html_document
 
 ### Loading and preprocessing the data 
 
-```{r, echo=TRUE}
+
+```r
 #install.packages("plyr")
 #install.packages("chron")
 #install.packages("ggplot2")
@@ -22,7 +23,8 @@ activity <- read.csv("activity.csv")
 
 ### Histogram of the total number of steps each day
 
-```{r, echo=TRUE}
+
+```r
 stepsday <-ddply(activity, "date", transform, total=sum(steps))
 stepsday <- subset(stepsday, !duplicated(date))
 hist(stepsday$total,
@@ -30,25 +32,29 @@ hist(stepsday$total,
     xlab = "Total Steps Per Day")
 ```
 
+![plot of chunk unnamed-chunk-2](figure/unnamed-chunk-2-1.png) 
+
 ### What is the mean and total number of steps taken each day?
 
 The instructions say to "ignore missing values in the dataset." I interpreted this as "Calculate the mean with na.rm = True". This choice means that any day with even one value for steps taken in a given 5-minute interval will be counted towards a full day's data. 
 
-```{r, echo=TRUE}
+
+```r
 options(digits=7)
 meansteps <- mean(stepsday$total, na.rm=T)
 mediansteps <- median(stepsday$total, na.rm=T)
 options(scipen = 999) # Turn off scientific notation so that values printed out aren't in scientific notation.
 ```
 
-#### The mean steps per day was `r meansteps`. The median steps per day was `r mediansteps`.
+#### The mean steps per day was 10766.1886792. The median steps per day was 10765.
   
   
 ### What is the average daily activity pattern?
 
 The instructions were to plot (using a time series plot of type = 'l') the number of steps taken in each 5-minute interval averaged across all days (y-axis). I interpreted "averaged across all days" to mean "averaged across all days for which the number of steps in the interval was not NA."
 
-```{r, echo=TRUE}
+
+```r
 options(scipen = 0) # Turn on scientific notation
 intervals = subset(activity, date == "2012-10-01",select = interval)
 mean.steps <- tapply(activity$steps, activity$interval, mean, na.rm=T)
@@ -61,24 +67,28 @@ plot(meanstepsperinterval,
     ylab = "Mean steps per day")
 ```
 
+![plot of chunk unnamed-chunk-4](figure/unnamed-chunk-4-1.png) 
+
 #### Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
 
-```{r, echo=TRUE}
+
+```r
 maxinterval <- meanstepsperinterval[which(meanstepsperinterval$mean.steps
                                          == max(meanstepsperinterval$mean.steps)),1]
 ```
-#### The max number of steps occurs within the interval beginning with minute `r maxinterval`. This correlates to 8:35-8:40AM.  
+#### The max number of steps occurs within the interval beginning with minute 835. This correlates to 8:35-8:40AM.  
 
   
 ### Inputting missing values
 
 Calculate and report the total number of missing values in the dataset (coded as NA).
 
-```{r, echo=TRUE}
+
+```r
 missing <- sum(is.na(activity[,1]))
 ```
 
-#### The total number of missing values was `r missing`.
+#### The total number of missing values was 2304.
 
 Devise a strategy for filling in all of the missing values in the dataset.
 
@@ -86,7 +96,8 @@ I chose to replace each NA value for steps with the mean for that 5-minute inter
 
 Create a new dataset that is equal to the original dataset but with the missing data filled in.
 
-```{r, echo=TRUE}
+
+```r
 # Create new data frame
 newactivity <- activity
 # For every row in the new data frame, if the value of steps for that row is NA, we are going to change the value
@@ -99,22 +110,28 @@ for (row in 1:length(newactivity$steps)) {
 newmissing <-sum(is.na(newactivity[,1]))
 ```
 
-There are `r missing` NA values in the new dataframe, confirming the NA values have all been replaced by data.
+There are 2304 NA values in the new dataframe, confirming the NA values have all been replaced by data.
 
 Make a histogram of the total number of steps taken each day and calculate and report the mean and median total number of steps taken per day. 
 
-```{r, echo=TRUE}
+
+```r
 newstepsday <-ddply(newactivity, "date", transform, total=sum(steps))
 newstepsday <- subset(newstepsday, !duplicated(date))
 hist(newstepsday$total,
     main = "Frequency of Days with Total Steps Per Day",
     xlab = "Total Steps Per Day")
+```
+
+![plot of chunk unnamed-chunk-8](figure/unnamed-chunk-8-1.png) 
+
+```r
 newmeansteps <- mean(newstepsday$total, na.rm=T)
 newmediansteps <- median(newstepsday$total, na.rm=T)
 options(scipen = 999) # Turn off scientific notation so that values printed out aren't in scientific notation.
 ```
 
-#### The new mean steps per day was `r newmeansteps`. The median steps per day was `r newmediansteps`.
+#### The new mean steps per day was 10766.1886792. The median steps per day was 10766.1886792.
 
 #### Do these values differ from the estimates from the first part of the assignment? What is the impact of inputing missing data on the estimates of the total daily number of steps?
 
@@ -129,7 +146,8 @@ a weekday or weekend
 
 The instructions do not say whether the original (with NA values) or the new dataset (with NA values replaced) should be used for this plot. I chose to use the original data with NA values.
 
-```{r, echo=TRUE}
+
+```r
 options(scipen = 0) # Turn off scientific notation so that values printed out aren't in scientific notation.
 type <- is.weekend(activity$date)
 activitydaytype <- cbind(activity,type)
@@ -148,3 +166,5 @@ g <- g + facet_grid(type ~ .)
 g <- g + ggtitle("Average Number of Steps per 5-Minute Interval; Weekday vs. Weekend")
 print(g)
 ```
+
+![plot of chunk unnamed-chunk-9](figure/unnamed-chunk-9-1.png) 
